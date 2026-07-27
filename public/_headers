@@ -1,0 +1,35 @@
+/*
+  Netlify caching & security headers
+  https://docs.netlify.com/routing/headers/
+*/
+
+/*
+  Static assets - aggressive caching
+*/
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*
+  HTML pages
+*/
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*
+  Sitemap & robots - revalidate frequently
+*/
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+/*
+  Security headers on all pages
+*/
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-XSS-Protection: 1; mode=block

@@ -37,7 +37,7 @@ export default function Navbar() {
       <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-[72px]">
           <a href="#" className="flex items-center" aria-label="SixHood - Home">
-            <img src="/assets/logo2.svg" alt="" className={`h-12 w-auto transition-all duration-300 ${scrolled ? '' : 'brightness-0 invert'}`} aria-hidden="true" />
+            <img src="/assets/logo2.svg" alt="" className={`h-12 w-auto transition-all duration-300 ${scrolled ? '' : 'brightness-0 invert'}`} aria-hidden="true" width={160} height={48} decoding="async" />
           </a>
 
           <div className="hidden md:flex items-center gap-0.5">

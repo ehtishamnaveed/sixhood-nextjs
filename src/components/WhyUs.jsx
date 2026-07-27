@@ -44,8 +44,11 @@ export default function WhyUs() {
               <img
                 src="/assets/toronto-skyline.jpg"
                 alt="Toronto skyline with the CN Tower, representing SixHood's Canadian roots"
+                width={600}
+                height={240}
                 className="w-full h-[240px] object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
             </div>

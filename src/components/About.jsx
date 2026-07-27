@@ -27,8 +27,11 @@ export default function About() {
               <img
                 src="/assets/about-team.jpg"
                 alt="SixHood team members collaborating at a whiteboard during a strategy session"
+                width={600}
+                height={280}
                 className="w-full h-[280px] object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/15 to-transparent" />
             </div>

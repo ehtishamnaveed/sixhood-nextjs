@@ -5,8 +5,11 @@ export default function CtaBanner() {
         <img
           src="/assets/cta-network.jpg"
           alt="Server room with network infrastructure and glowing status lights"
+          width={1920}
+          height={800}
           className="w-full h-full object-cover"
           loading="lazy"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-[#0d1117]/50" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/70 to-[#0d1117]/30" />

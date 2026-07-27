@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="py-16 grid md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-12 lg:gap-10">
           <div>
             <a href="#" className="inline-flex items-center mb-5" aria-label="SixHood - Home">
-              <img src="/assets/logo2.svg" alt="" className="h-12 w-auto" aria-hidden="true" />
+              <img src="/assets/logo2.svg" alt="" className="h-12 w-auto" aria-hidden="true" width={160} height={48} decoding="async" />
             </a>
             <p className="text-[14px] leading-[1.7] text-text-secondary max-w-[280px]">
               Canadian IT solutions for businesses that want their

@@ -5,8 +5,11 @@ export default function Hero() {
         <img
           src="/assets/hero-workspace.jpg"
           alt="Person working on a laptop with data and code on screen"
+          width={1920}
+          height={1080}
           className="w-full h-full object-cover"
           loading="eager"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-[#0d1117]/40" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/60 via-[#0d1117]/30 to-transparent" />
