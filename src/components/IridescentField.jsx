@@ -7,13 +7,16 @@ attribute vec2 position;
 void main() { gl_Position = vec4(position, 0.0, 1.0); }
 `;
 
-// Dynamic fluid-dynamics shader: domain-warped curl noise and velocity flow
-// mapped onto the studio pastels (Lilac, Ice Mint, Warm Apricot, Sky).
+// Dynamic fluid-dynamics shader: domain-warped curl noise and stream flow
+// interactively displaced and swirled by mouse movement and hover across the studio pastels.
 const FRAGMENT = `
 precision mediump float;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform vec2 uPointer;
+uniform vec2 uVelocity;
+uniform float uSpeed;
+uniform float uHover;
 
 // Clean studio palette - refined, elegant, zero harsh pinks
 const vec3 LILAC   = vec3(0.812, 0.761, 0.969); // Soft lavender / lilac
@@ -58,45 +61,65 @@ void main() {
   vec2 p = vec2(uv.x * aspect, uv.y);
   vec2 pointer = vec2(uPointer.x * aspect, uPointer.y);
 
-  // Visibly active liquid time flow
-  float t = uTime * 0.18;
+  // Active liquid time flow
+  float t = uTime * 0.20;
 
-  // Fluid stream velocity currents
-  vec2 flow = vec2(
+  // Ambient fluid stream velocity currents
+  vec2 streamFlow = vec2(
     sin(p.y * 1.8 + t * 0.8) + cos(p.x * 1.4 - t * 0.6),
     cos(p.x * 1.8 - t * 0.7) + sin(p.y * 1.4 + t * 0.5)
   );
 
-  // Interactive pointer wake displacement
+  // ── Interactive Mouse Fluid Effect ──
   vec2 toPointer = p - pointer;
   float dist = length(toPointer);
-  float mouseEffect = exp(-dist * 3.2);
-  vec2 mouseFlow = (toPointer / (dist + 0.001)) * mouseEffect * 0.45;
+
+  // Broad, smooth liquid influence radius around mouse cursor
+  float mouseRadius = 0.75;
+  float mouseInfluence = smoothstep(mouseRadius, 0.0, dist) * uHover;
+
+  // 1. Swirling vortex: rotates the liquid gradient around the cursor
+  vec2 mouseSwirl = vec2(-toPointer.y, toPointer.x) * (1.2 + uSpeed * 2.0) * mouseInfluence;
+
+  // 2. Velocity drag: cursor pulls and drags the fluid along its movement path
+  vec2 mouseDrag = uVelocity * 2.2 * mouseInfluence;
+
+  // 3. Gentle fluid displacement: cursor displaces fluid outwards
+  vec2 mousePush = (toPointer / max(dist, 0.08)) * mouseInfluence * 0.25;
+
+  // Total interactive mouse displacement on the fluid field
+  vec2 mouseWarp = mouseSwirl + mouseDrag - mousePush;
+
+  // Displace coordinates by both natural stream flow and interactive mouse movement
+  vec2 liquidP = p + mouseWarp * 0.32;
 
   // Multi-tier domain warping for swirling liquid currents
   vec2 q = vec2(
-    fbm(p * 1.2 + flow * 0.35 + vec2(t * 0.4, -t * 0.3)),
-    fbm(p * 1.2 - flow * 0.35 + vec2(-t * 0.3, t * 0.4) + vec2(3.2, 5.7))
+    fbm(liquidP * 1.2 + streamFlow * 0.35 + vec2(t * 0.4, -t * 0.3)),
+    fbm(liquidP * 1.2 - streamFlow * 0.35 + vec2(-t * 0.3, t * 0.4) + vec2(3.2, 5.7))
   );
 
   // Swirling vortices & rotational eddies
-  vec2 rP = rot(t * 0.25 + q.x * 1.5) * (p * 1.4 + q * 1.6);
+  vec2 rP = rot(t * 0.25 + q.x * 1.5) * (liquidP * 1.4 + q * 1.6);
   vec2 r = vec2(
-    fbm(rP + q * 1.3 + vec2(1.7, 9.2) + mouseFlow),
-    fbm(rP - q * 1.3 + vec2(8.3, 2.8) - mouseFlow)
+    fbm(rP + q * 1.3 + vec2(1.7, 9.2) + mouseWarp * 0.4),
+    fbm(rP - q * 1.3 + vec2(8.3, 2.8) - mouseWarp * 0.4)
   );
 
   // Fluid density field
-  float density = fbm(p * 1.1 + r * 1.6 + flow * 0.2);
+  float density = fbm(liquidP * 1.1 + r * 1.6 + streamFlow * 0.2);
 
-  // Chromatic fluid blending
+  // Chromatic fluid blending across studio palette
   vec3 color = mix(LILAC, SKY, smoothstep(0.15, 0.65, density + (1.0 - uv.x) * 0.15));
   color = mix(color, ICE, smoothstep(0.35, 0.80, r.x + uv.x * 0.25 - 0.1));
   color = mix(color, APRICOT, smoothstep(0.45, 0.88, r.y + (1.0 - uv.y) * 0.25));
 
   // Liquid surface sheen & wave crest reflections
   float liquidSheen = sin(density * 8.0 + (uv.x + uv.y) * 3.5 + t * 2.2) * 0.5 + 0.5;
-  color += vec3(0.045) * liquidSheen * (0.8 + mouseEffect);
+  color += vec3(0.04) * liquidSheen;
+
+  // Subtle luminous illumination under mouse hover
+  color += (ICE * 0.08 + SKY * 0.08) * mouseInfluence * (1.0 + uSpeed * 0.8);
 
   // Soft fade into paper tone toward bottom of hero for seamless typography contrast
   color = mix(color, PAPER, smoothstep(0.55, 0.02, uv.y) * 0.90);
@@ -119,7 +142,11 @@ export default function IridescentField({ className = '' }) {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
-      return gl.getShaderParameter(shader, gl.COMPILE_STATUS) ? shader : null;
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.warn('Shader compile error:', gl.getShaderInfoLog(shader));
+        return null;
+      }
+      return shader;
     };
     const vertex = compile(gl.VERTEX_SHADER, VERTEX);
     const fragment = compile(gl.FRAGMENT_SHADER, FRAGMENT);
@@ -129,7 +156,10 @@ export default function IridescentField({ className = '' }) {
     gl.attachShader(program, vertex);
     gl.attachShader(program, fragment);
     gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.warn('Program link error:', gl.getProgramInfoLog(program));
+      return;
+    }
     gl.useProgram(program);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
@@ -141,9 +171,22 @@ export default function IridescentField({ className = '' }) {
     const uResolution = gl.getUniformLocation(program, 'uResolution');
     const uTime = gl.getUniformLocation(program, 'uTime');
     const uPointer = gl.getUniformLocation(program, 'uPointer');
+    const uVelocity = gl.getUniformLocation(program, 'uVelocity');
+    const uSpeed = gl.getUniformLocation(program, 'uSpeed');
+    const uHover = gl.getUniformLocation(program, 'uHover');
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const pointer = { x: 0.62, y: 0.58, tx: 0.62, ty: 0.58 };
+    const pointer = {
+      x: 0.62,
+      y: 0.58,
+      tx: 0.62,
+      ty: 0.58,
+      vx: 0,
+      vy: 0,
+      speed: 0,
+      hover: 0,
+      targetHover: 0,
+    };
     const start = performance.now();
     let frame = 0;
     let visible = true;
@@ -158,10 +201,29 @@ export default function IridescentField({ className = '' }) {
     };
 
     const draw = (now) => {
-      pointer.x += (pointer.tx - pointer.x) * 0.05;
-      pointer.y += (pointer.ty - pointer.y) * 0.05;
-      gl.uniform1f(uTime, reduce ? 18 : (now - start) / 1000 + 18);
+      const nowSec = reduce ? 18 : (now - start) / 1000 + 18;
+
+      // Responsive pointer tracking with fluid inertia
+      const prevX = pointer.x;
+      const prevY = pointer.y;
+      pointer.x += (pointer.tx - pointer.x) * 0.14;
+      pointer.y += (pointer.ty - pointer.y) * 0.14;
+      pointer.hover += (pointer.targetHover - pointer.hover) * 0.1;
+
+      // Velocity calculation for kinetic fluid push/drag
+      const currentVx = (pointer.x - prevX) * 16.0;
+      const currentVy = (pointer.y - prevY) * 16.0;
+      pointer.vx += (currentVx - pointer.vx) * 0.22;
+      pointer.vy += (currentVy - pointer.vy) * 0.22;
+      const currentSpeed = Math.hypot(pointer.vx, pointer.vy);
+      pointer.speed += (currentSpeed - pointer.speed) * 0.2;
+
+      gl.uniform1f(uTime, nowSec);
       gl.uniform2f(uPointer, pointer.x, pointer.y);
+      gl.uniform2f(uVelocity, pointer.vx, pointer.vy);
+      gl.uniform1f(uSpeed, Math.min(pointer.speed, 3.0));
+      gl.uniform1f(uHover, pointer.hover);
+
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       canvas.classList.add('is-ready');
     };
@@ -177,8 +239,23 @@ export default function IridescentField({ className = '' }) {
 
     const onPointer = (event) => {
       const rect = canvas.getBoundingClientRect();
-      pointer.tx = (event.clientX - rect.left) / rect.width;
-      pointer.ty = 1 - (event.clientY - rect.top) / rect.height;
+      const inside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+
+      if (inside) {
+        pointer.targetHover = 1.0;
+        pointer.tx = (event.clientX - rect.left) / rect.width;
+        pointer.ty = 1 - (event.clientY - rect.top) / rect.height;
+      } else {
+        pointer.targetHover = 0.0;
+      }
+    };
+
+    const onPointerLeave = () => {
+      pointer.targetHover = 0.0;
     };
 
     const onResize = () => {
@@ -198,6 +275,7 @@ export default function IridescentField({ className = '' }) {
 
     window.addEventListener('resize', onResize);
     window.addEventListener('pointermove', onPointer, { passive: true });
+    document.addEventListener('mouseleave', onPointerLeave);
     document.addEventListener('visibilitychange', play);
 
     return () => {
@@ -205,6 +283,7 @@ export default function IridescentField({ className = '' }) {
       observer.disconnect();
       window.removeEventListener('resize', onResize);
       window.removeEventListener('pointermove', onPointer);
+      document.removeEventListener('mouseleave', onPointerLeave);
       document.removeEventListener('visibilitychange', play);
     };
   }, []);
