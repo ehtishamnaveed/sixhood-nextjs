@@ -592,6 +592,20 @@ section:focus {
     radial-gradient(60% 60% at 8% 18%, var(--lilac) 0%, transparent 60%),
     radial-gradient(60% 50% at 58% 38%, var(--apricot) 0%, transparent 70%),
     var(--paper);
+  background-size: 135% 135%;
+  animation: heroGradientDrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes heroGradientDrift {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 60%;
+  }
+  100% {
+    background-position: 20% 100%;
+  }
 }
 
 .iridescent-field {

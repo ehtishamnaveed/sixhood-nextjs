@@ -7,20 +7,30 @@ attribute vec2 position;
 void main() { gl_Position = vec4(position, 0.0, 1.0); }
 `;
 
-// Domain-warped noise mapped onto the four logo pastels, drifting slowly and bending toward the pointer.
+// Dynamic fluid-dynamics shader: domain-warped curl noise and velocity flow
+// mapped onto the studio pastels (Lilac, Ice Mint, Warm Apricot, Sky).
 const FRAGMENT = `
 precision mediump float;
 uniform vec2 uResolution;
 uniform float uTime;
 uniform vec2 uPointer;
 
-const vec3 LILAC = vec3(0.812, 0.761, 0.969);
-const vec3 BLUSH = vec3(0.965, 0.792, 0.875);
-const vec3 APRICOT = vec3(0.980, 0.867, 0.769);
-const vec3 ICE = vec3(0.741, 0.945, 0.925);
-const vec3 PAPER = vec3(0.937, 0.933, 0.957);
+// Clean studio palette - refined, elegant, zero harsh pinks
+const vec3 LILAC   = vec3(0.812, 0.761, 0.969); // Soft lavender / lilac
+const vec3 ICE     = vec3(0.730, 0.945, 0.920); // Mint / ice cyan
+const vec3 APRICOT = vec3(0.980, 0.867, 0.769); // Warm apricot / champagne
+const vec3 SKY     = vec3(0.790, 0.890, 0.985); // Airy periwinkle / sky
+const vec3 PAPER   = vec3(0.937, 0.933, 0.957); // Studio base paper
 
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+mat2 rot(float a) {
+  float c = cos(a);
+  float s = sin(a);
+  return mat2(c, -s, s, c);
+}
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
 
 float noise(vec2 p) {
   vec2 i = floor(p);
@@ -31,14 +41,15 @@ float noise(vec2 p) {
 }
 
 float fbm(vec2 p) {
-  float value = 0.0;
-  float amp = 0.5;
-  for (int i = 0; i < 5; i++) {
-    value += amp * noise(p);
-    p = p * 2.03 + vec2(1.7, 9.2);
-    amp *= 0.5;
+  float v = 0.0;
+  float a = 0.5;
+  mat2 m = rot(0.5);
+  for (int i = 0; i < 4; i++) {
+    v += a * noise(p);
+    p = m * p * 2.02 + vec2(0.3, 0.5);
+    a *= 0.5;
   }
-  return value;
+  return v;
 }
 
 void main() {
@@ -46,28 +57,55 @@ void main() {
   float aspect = uResolution.x / uResolution.y;
   vec2 p = vec2(uv.x * aspect, uv.y);
   vec2 pointer = vec2(uPointer.x * aspect, uPointer.y);
-  float t = uTime * 0.035;
 
-  vec2 q = vec2(fbm(p * 1.3 + t), fbm(p * 1.3 - t + 4.1));
-  vec2 r = vec2(fbm(p * 1.1 + q * 1.7 + vec2(1.7, 9.2) + t * 1.4),
-                fbm(p * 1.1 + q * 1.7 + vec2(8.3, 2.8) - t));
-  float pull = exp(-distance(p, pointer) * 2.6);
-  r += (pointer - p) * 0.35 * pull;
-  float n = fbm(p * 1.2 + r * 1.9);
+  // Visibly active liquid time flow
+  float t = uTime * 0.18;
 
-  vec3 color = mix(LILAC, BLUSH, smoothstep(0.25, 0.7, n + (1.0 - uv.x) * 0.1));
-  color = mix(color, ICE, smoothstep(0.5, 0.85, r.x + uv.x * 0.3 - 0.12));
-  color = mix(color, APRICOT, smoothstep(0.55, 0.92, r.y + (1.0 - uv.x) * 0.18 - uv.y * 0.15));
+  // Fluid stream velocity currents
+  vec2 flow = vec2(
+    sin(p.y * 1.8 + t * 0.8) + cos(p.x * 1.4 - t * 0.6),
+    cos(p.x * 1.8 - t * 0.7) + sin(p.y * 1.4 + t * 0.5)
+  );
 
-  float sheen = sin(n * 7.0 + (uv.x + uv.y) * 4.0 + uTime * 0.18) * 0.5 + 0.5;
-  color += vec3(0.035) * sheen * (0.6 + pull);
+  // Interactive pointer wake displacement
+  vec2 toPointer = p - pointer;
+  float dist = length(toPointer);
+  float mouseEffect = exp(-dist * 3.2);
+  vec2 mouseFlow = (toPointer / (dist + 0.001)) * mouseEffect * 0.45;
 
-  color = mix(color, PAPER, smoothstep(0.42, 0.0, uv.y) * 0.92);
+  // Multi-tier domain warping for swirling liquid currents
+  vec2 q = vec2(
+    fbm(p * 1.2 + flow * 0.35 + vec2(t * 0.4, -t * 0.3)),
+    fbm(p * 1.2 - flow * 0.35 + vec2(-t * 0.3, t * 0.4) + vec2(3.2, 5.7))
+  );
+
+  // Swirling vortices & rotational eddies
+  vec2 rP = rot(t * 0.25 + q.x * 1.5) * (p * 1.4 + q * 1.6);
+  vec2 r = vec2(
+    fbm(rP + q * 1.3 + vec2(1.7, 9.2) + mouseFlow),
+    fbm(rP - q * 1.3 + vec2(8.3, 2.8) - mouseFlow)
+  );
+
+  // Fluid density field
+  float density = fbm(p * 1.1 + r * 1.6 + flow * 0.2);
+
+  // Chromatic fluid blending
+  vec3 color = mix(LILAC, SKY, smoothstep(0.15, 0.65, density + (1.0 - uv.x) * 0.15));
+  color = mix(color, ICE, smoothstep(0.35, 0.80, r.x + uv.x * 0.25 - 0.1));
+  color = mix(color, APRICOT, smoothstep(0.45, 0.88, r.y + (1.0 - uv.y) * 0.25));
+
+  // Liquid surface sheen & wave crest reflections
+  float liquidSheen = sin(density * 8.0 + (uv.x + uv.y) * 3.5 + t * 2.2) * 0.5 + 0.5;
+  color += vec3(0.045) * liquidSheen * (0.8 + mouseEffect);
+
+  // Soft fade into paper tone toward bottom of hero for seamless typography contrast
+  color = mix(color, PAPER, smoothstep(0.55, 0.02, uv.y) * 0.90);
+
   gl_FragColor = vec4(color, 1.0);
 }
 `;
 
-const RESOLUTION_SCALE = 0.4;
+const RESOLUTION_SCALE = 0.6;
 
 export default function IridescentField({ className = '' }) {
   const canvasRef = useRef(null);
@@ -120,8 +158,8 @@ export default function IridescentField({ className = '' }) {
     };
 
     const draw = (now) => {
-      pointer.x += (pointer.tx - pointer.x) * 0.035;
-      pointer.y += (pointer.ty - pointer.y) * 0.035;
+      pointer.x += (pointer.tx - pointer.x) * 0.05;
+      pointer.y += (pointer.ty - pointer.y) * 0.05;
       gl.uniform1f(uTime, reduce ? 18 : (now - start) / 1000 + 18);
       gl.uniform2f(uPointer, pointer.x, pointer.y);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
