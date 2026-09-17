@@ -1,49 +1,96 @@
-export default function CtaBanner() {
-  return (
-    <section className="relative py-20 md:py-28 selection-dark">
-      <div className="absolute inset-0">
-        <img
-          src="/assets/cta-network.jpg"
-          alt="Server room with network infrastructure and glowing status lights"
-          width={1920}
-          height={800}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-        <div className="absolute inset-0 bg-[#0d1117]/50" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d1117]/70 to-[#0d1117]/30" />
-      </div>
+'use client';
 
-      <div className="relative max-w-[1200px] mx-auto px-6 lg:px-8 text-center">
-        <p className="text-primary-light text-[13px] font-semibold tracking-[0.15em] uppercase mb-5">
-          Ready to get started?
-        </p>
-        <h2 className="text-[32px] md:text-[44px] font-bold leading-[1.12] tracking-[-0.01em] text-white mb-5 max-w-[640px] mx-auto">
-          Let's build something that moves your business forward
-        </h2>
-        <p className="text-[17px] leading-[1.7] text-white/60 max-w-[480px] mx-auto mb-9">
-          Whether it's a quick fix or a full transformation, we'll figure
-          out the right path together.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <a
-            href="#contact"
-            className="inline-flex items-center gap-2 px-7 py-3.5 text-[15px] font-semibold text-[#0d1117] bg-primary-light rounded-lg hover:bg-white transition-colors duration-200"
-          >
-            Talk to us
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </a>
-          <a
-            href="#projects"
-            className="inline-flex items-center px-7 py-3.5 text-[15px] font-medium text-white/80 border border-white/20 rounded-lg hover:bg-white/10 hover:text-white transition-colors duration-200"
-          >
-            See our work
-          </a>
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function CtaBanner() {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const section = containerRef.current;
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        '.cta-content-box',
+        { y: 40, opacity: 0, scale: 0.97 },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        }
+      );
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      ref={containerRef}
+      className="py-20 sm:py-28 relative overflow-hidden z-10"
+      aria-label="Call to Action"
+    >
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="cta-content-box relative rounded-3xl glass-panel-glow border-white/15 p-10 sm:p-16 lg:p-20 overflow-hidden text-center">
+          
+          {/* Internal Ambient Aurora Glow */}
+          <div
+            className="absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[380px] rounded-full blur-[140px] opacity-35 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, #c4b5fd 0%, #fbcfe8 40%, #a7f3d0 80%, transparent 100%)',
+            }}
+          />
+
+          <div className="relative z-10 max-w-[800px] mx-auto space-y-6">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-pill">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#a7f3d0] shadow-[0_0_8px_#a7f3d0]" />
+              <span className="text-[12px] font-semibold tracking-wider uppercase text-text-secondary">
+                Creative Collaboration
+              </span>
+            </div>
+
+            <h2 className="text-[40px] sm:text-[54px] lg:text-[68px] font-black leading-[1.02] tracking-[-0.035em] text-white">
+              Ready to create something <br />
+              <span className="text-aurora">extraordinary together?</span>
+            </h2>
+
+            <p className="text-[16px] sm:text-[19px] leading-[1.7] text-text-secondary font-normal max-w-[620px] mx-auto">
+              Whether you are launching a new digital venture, redesigning your flagship web experience,
+              or crafting an iconic brand system — our senior leads are ready.
+            </p>
+
+            <div className="pt-6 flex flex-wrap items-center justify-center gap-4">
+              <a
+                href="#contact"
+                className="btn-aurora text-[13px] sm:text-[14px] uppercase tracking-wider font-bold px-9 py-4 inline-flex items-center gap-2.5"
+              >
+                <span>Initiate a Project</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </a>
+
+              <a
+                href="mailto:info@flastech.ca"
+                className="btn-glass text-[13px] sm:text-[14px] uppercase tracking-wider font-medium px-8 py-4 inline-flex items-center gap-2"
+              >
+                <span>Email Studio Directly</span>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

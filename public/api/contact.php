@@ -18,15 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // ──────────────────────────────────────────────
 //  CONFIGURATION — update these before deploying
 // ──────────────────────────────────────────────
-$to_email  = 'info@sixhood.ca';                         // where submissions land
-$from_name = 'SixHood Website';                         // sender name on the email
-$subject   = 'New Contact Form Submission — SixHood';   // email subject line
+$to_email  = 'info@flastech.ca';                         // where submissions land
+$from_name = 'Flastech Website';                         // sender name on the email
+$subject   = 'New Contact Form Submission — Flastech';   // email subject line
 
 // ──────────────────────────────────────────────
 //  Rate limiting (simple IP-based, 5 per 10 min)
 // ──────────────────────────────────────────────
 $ip       = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$rate_dir = sys_get_temp_dir() . '/sixhood_ratelimit';
+$rate_dir = sys_get_temp_dir() . '/flastech_ratelimit';
 if (!is_dir($rate_dir)) {
     mkdir($rate_dir, 0700);
 }
@@ -160,7 +160,7 @@ $headers  = "MIME-Version: 1.0\r\n";
 $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 $headers .= "From: {$from_name} <{$email}>\r\n";
 $headers .= "Reply-To: {$email}\r\n";
-$headers .= "X-Mailer: SixHood-Website/1.0";
+$headers .= "X-Mailer: Flastech-Website/1.0";
 
 $sent = @mail($to_email, $subject, $body, $headers);
 
@@ -172,5 +172,5 @@ if ($sent) {
     echo json_encode(['success' => true, 'message' => 'Thanks for reaching out. We\'ll get back to you within one business day.']);
 } else {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Something went wrong on our end. Please email us directly at info@sixhood.ca']);
+    echo json_encode(['success' => false, 'error' => 'Something went wrong on our end. Please email us directly at info@flastech.ca']);
 }

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96" width="320" height="96" aria-hidden="true">
+  <defs>
+    <style>
+      .logo-flash { font-family: 'Inter', 'Arial Black', sans-serif; font-weight: 900; font-size: 68px; letter-spacing: -0.02em; fill: #ffffff; dominant-baseline: hanging; }
+      .logo-tech { font-family: 'Inter', 'Arial Black', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: 0.06em; fill: #00d4ff; dominant-baseline: hanging; }
+      .bolt1 { fill: none; stroke: #00d4ff; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+      .bolt2 { fill: none; stroke: #00d4ff; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; opacity: 0.55; }
+    </style>
+  </defs>
+
+  <!-- FLAS -->
+  <text x="1" y="6" class="logo-flash">FLAS</text>
+
+  <!-- TECH (offset below, near the S) -->
+  <text x="152" y="68" class="logo-tech">TECH</text>
+
+  <!-- Lightning bolt 1: originating bottom-left of L, angling up-right past the text -->
+  <polyline class="bolt1" points="12,82 32,82 20,56 58,56 36,22 72,22" />
+
+  <!-- Lightning bolt 2: thinner, offset, angling down-left behind text -->
+  <polyline class="bolt2" points="248,10 272,10 252,34 288,34 260,62 292,62" />
+</svg>
