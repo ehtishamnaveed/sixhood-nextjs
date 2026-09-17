@@ -92,10 +92,6 @@ export default function Header() {
           <Logo variant="compact" />
         </a>
 
-        <p className="site-header__clock">
-          <span>Toronto</span> <LocalTime />
-        </p>
-
         <nav className="site-header__nav" aria-label="Primary">
           {nav.slice(0, 3).map((item) => (
             <a key={item.href} href={item.href} className="site-header__link">

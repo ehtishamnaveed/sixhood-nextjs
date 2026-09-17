@@ -64,10 +64,6 @@ export default function Hero() {
       <IridescentField className="hero__field" />
 
       <div className="hero__inner">
-        <p className="label hero__eyebrow" data-hero-in>
-          Software house · Toronto
-        </p>
-
         <h1 id="hero-title" className="cut" ref={cutRef}>
           <span className="sr-only">Built fast. Built to last.</span>
           <span className="cut__piece cut__piece--a" aria-hidden="true">
@@ -99,11 +95,14 @@ export default function Hero() {
           </div>
         </div>
 
-        <ul className="hero__index" data-hero-in aria-label="What we build">
-          {services.map((service) => (
-            <li key={service.title}>{service.title}</li>
-          ))}
-        </ul>
+        <div className="hero__index" data-hero-in>
+          <ul className="hero__services" aria-label="What we build">
+            {services.map((service) => (
+              <li key={service.title}>{service.title}</li>
+            ))}
+          </ul>
+          <span className="hero__location">Software house · Toronto</span>
+        </div>
       </div>
     </section>
   );

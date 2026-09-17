@@ -453,6 +453,7 @@ section:focus {
   display: flex;
   align-items: center;
   gap: 30px;
+  margin-left: auto;
 }
 
 .site-header__link,
@@ -727,7 +728,9 @@ section:focus {
 .hero__index {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 32px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 32px;
   margin-top: clamp(32px, 6vh, 64px);
   padding-top: 16px;
   border-top: 1px solid var(--rule-dark);
@@ -736,6 +739,21 @@ section:focus {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.hero__services {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 32px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hero__location {
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 /* Hidden until the entrance runs; the fallback animation reveals them if JS never does. */
