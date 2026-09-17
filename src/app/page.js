@@ -1,44 +1,30 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-
-import LenisProvider from '../components/LenisProvider';
-import AmbientAurora from '../components/AmbientAurora';
-import Navbar from '../components/Navbar';
+import Intro from '../components/Intro';
+import Motion from '../components/Motion';
+import Header from '../components/Header';
 import Hero from '../components/Hero';
-
-const ScrollingTicker = dynamic(() => import('../components/ScrollingTicker'), { ssr: false });
-const Capabilities = dynamic(() => import('../components/Capabilities'), { ssr: true });
-const Performance = dynamic(() => import('../components/Performance'), { ssr: true });
-const Work = dynamic(() => import('../components/Work'), { ssr: true });
-const WhyFlastech = dynamic(() => import('../components/WhyFlastech'), { ssr: true });
-const CtaBanner = dynamic(() => import('../components/CtaBanner'), { ssr: true });
-const Contact = dynamic(() => import('../components/Contact'), { ssr: true });
-const Footer = dynamic(() => import('../components/Footer'), { ssr: true });
+import Statement from '../components/Statement';
+import Services from '../components/Services';
+import Work from '../components/Work';
+import Process from '../components/Process';
+import Contact from '../components/Contact';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (
-    <LenisProvider>
-      {/* Dynamic Mixed Aurora Gradient Background */}
-      <AmbientAurora />
-
-      {/* Floating Navigation */}
-      <Navbar />
-
-      {/* Main Page Flow */}
-      <main id="main" className="relative z-10">
+    <>
+      <Intro />
+      <Header />
+      <main id="main" tabIndex={-1}>
         <Hero />
-        <ScrollingTicker />
-        <Capabilities />
-        <Performance />
+        <Statement />
+        <Services />
         <Work />
-        <WhyFlastech />
-        <CtaBanner />
+        <Process />
         <Contact />
       </main>
-
-      {/* Footer */}
       <Footer />
-    </LenisProvider>
+      {/* Last, so scroll triggers are created after the pinned Work section. */}
+      <Motion />
+    </>
   );
 }
