@@ -61,37 +61,38 @@ void main() {
   vec2 p = vec2(uv.x * aspect, uv.y);
   vec2 pointer = vec2(uPointer.x * aspect, uPointer.y);
 
-  // Active liquid time flow
-  float t = uTime * 0.20;
+  // Active liquid time flow - faster, more dynamic fluid motion
+  float t = uTime * 0.38;
 
   // Ambient fluid stream velocity currents
   vec2 streamFlow = vec2(
-    sin(p.y * 1.8 + t * 0.8) + cos(p.x * 1.4 - t * 0.6),
-    cos(p.x * 1.8 - t * 0.7) + sin(p.y * 1.4 + t * 0.5)
+    sin(p.y * 1.8 + t * 1.0) + cos(p.x * 1.4 - t * 0.8),
+    cos(p.x * 1.8 - t * 0.9) + sin(p.y * 1.4 + t * 0.7)
   );
 
   // ── Interactive Mouse Fluid Effect ──
   vec2 toPointer = p - pointer;
   float dist = length(toPointer);
 
-  // Broad, smooth liquid influence radius around mouse cursor
-  float mouseRadius = 0.75;
+  // Tighter, focused liquid influence radius around mouse cursor
+  float mouseRadius = 0.38;
   float mouseInfluence = smoothstep(mouseRadius, 0.0, dist) * uHover;
+  float mouseFactor = mouseInfluence * mouseInfluence;
 
-  // 1. Swirling vortex: rotates the liquid gradient around the cursor
-  vec2 mouseSwirl = vec2(-toPointer.y, toPointer.x) * (1.2 + uSpeed * 2.0) * mouseInfluence;
+  // 1. Swirling vortex: rotates the liquid gradient directly around the cursor
+  vec2 mouseSwirl = vec2(-toPointer.y, toPointer.x) * (1.6 + uSpeed * 2.4) * mouseFactor;
 
-  // 2. Velocity drag: cursor pulls and drags the fluid along its movement path
-  vec2 mouseDrag = uVelocity * 2.2 * mouseInfluence;
+  // 2. Velocity drag: cursor pulls and drags fluid along its movement path
+  vec2 mouseDrag = uVelocity * 2.6 * mouseFactor;
 
-  // 3. Gentle fluid displacement: cursor displaces fluid outwards
-  vec2 mousePush = (toPointer / max(dist, 0.08)) * mouseInfluence * 0.25;
+  // 3. Crisp fluid displacement: cursor displaces fluid outwards
+  vec2 mousePush = (toPointer / max(dist, 0.05)) * mouseFactor * 0.30;
 
   // Total interactive mouse displacement on the fluid field
   vec2 mouseWarp = mouseSwirl + mouseDrag - mousePush;
 
   // Displace coordinates by both natural stream flow and interactive mouse movement
-  vec2 liquidP = p + mouseWarp * 0.32;
+  vec2 liquidP = p + mouseWarp * 0.35;
 
   // Multi-tier domain warping for swirling liquid currents
   vec2 q = vec2(
@@ -100,7 +101,7 @@ void main() {
   );
 
   // Swirling vortices & rotational eddies
-  vec2 rP = rot(t * 0.25 + q.x * 1.5) * (liquidP * 1.4 + q * 1.6);
+  vec2 rP = rot(t * 0.28 + q.x * 1.5) * (liquidP * 1.4 + q * 1.6);
   vec2 r = vec2(
     fbm(rP + q * 1.3 + vec2(1.7, 9.2) + mouseWarp * 0.4),
     fbm(rP - q * 1.3 + vec2(8.3, 2.8) - mouseWarp * 0.4)
@@ -115,11 +116,11 @@ void main() {
   color = mix(color, APRICOT, smoothstep(0.45, 0.88, r.y + (1.0 - uv.y) * 0.25));
 
   // Liquid surface sheen & wave crest reflections
-  float liquidSheen = sin(density * 8.0 + (uv.x + uv.y) * 3.5 + t * 2.2) * 0.5 + 0.5;
+  float liquidSheen = sin(density * 8.0 + (uv.x + uv.y) * 3.5 + t * 2.6) * 0.5 + 0.5;
   color += vec3(0.04) * liquidSheen;
 
-  // Subtle luminous illumination under mouse hover
-  color += (ICE * 0.08 + SKY * 0.08) * mouseInfluence * (1.0 + uSpeed * 0.8);
+  // Subtle luminous illumination directly under cursor
+  color += (ICE * 0.09 + SKY * 0.09) * mouseFactor * (1.0 + uSpeed * 0.8);
 
   // Soft fade into paper tone toward bottom of hero for seamless typography contrast
   color = mix(color, PAPER, smoothstep(0.55, 0.02, uv.y) * 0.90);

@@ -593,7 +593,7 @@ section:focus {
     radial-gradient(60% 50% at 58% 38%, var(--apricot) 0%, transparent 70%),
     var(--paper);
   background-size: 135% 135%;
-  animation: heroGradientDrift 18s ease-in-out infinite alternate;
+  animation: heroGradientDrift 10s ease-in-out infinite alternate;
 }
 
 @keyframes heroGradientDrift {
