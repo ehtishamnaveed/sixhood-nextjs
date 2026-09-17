@@ -17,7 +17,7 @@
 
   --rule-dark: rgba(11, 11, 14, 0.16);
   --rule-light: rgba(239, 238, 244, 0.18);
-  --iris: linear-gradient(115deg, var(--lilac) 0%, var(--blush) 36%, var(--apricot) 66%, var(--ice) 100%);
+  --iris: linear-gradient(115deg, var(--lilac) 0%, var(--ice) 50%, var(--apricot) 100%);
 
   --font-display: var(--font-archivo), "Arial Narrow", sans-serif;
   --font-body: var(--font-archivo), system-ui, sans-serif;
@@ -590,7 +590,7 @@ section:focus {
   background:
     radial-gradient(70% 60% at 88% 12%, var(--ice) 0%, transparent 62%),
     radial-gradient(60% 60% at 8% 18%, var(--lilac) 0%, transparent 60%),
-    radial-gradient(60% 50% at 58% 38%, var(--blush) 0%, transparent 70%),
+    radial-gradient(60% 50% at 58% 38%, var(--apricot) 0%, transparent 70%),
     var(--paper);
 }
 
